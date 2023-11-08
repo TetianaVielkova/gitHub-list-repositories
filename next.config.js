@@ -8,6 +8,6 @@ module.exports = {
       domains: ['avatars.githubusercontent.com'],
     },
     env: {
-      GITHUB_TOKEN: "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",
+      GITHUB_TOKEN: "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",
     },
   };
