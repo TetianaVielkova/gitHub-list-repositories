@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Date from "../Date/date";
 import { Col,  Row } from "antd";
-import { colStyle, linkStyle, rowStyle } from "./CardRepos.style";
+import { colStyle, langStyle, linkStyle, rowStyle } from "./CardRepos.style";
 
 
 export default function CardRepos({ data }) {
@@ -21,7 +21,7 @@ export default function CardRepos({ data }) {
                 <Col xs={24} sm={12} md={11} lg={8} xl={7} key={node.id} style={colStyle}>
                     <Link style={linkStyle} href={node.url} target="_blank" >
                     {truncateName(node.name, 19)}
-                    <div style={{ fontSize: '18px' }}>{node.primaryLanguage ? node.primaryLanguage.name : 'JAVASCRIPT'}</div>
+                    <div style={langStyle}>{node.primaryLanguage ? node.primaryLanguage.name : ''}</div>
                     <Date dateString={node.updatedAt}/>
                     </Link>
                 </Col>

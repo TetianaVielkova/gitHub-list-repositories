@@ -17,6 +17,10 @@ export const rowStyle = {
     margin: 0,
 }
 
+export const langStyle = {
+    fontSize: 18,
+}
+
 
 
 
