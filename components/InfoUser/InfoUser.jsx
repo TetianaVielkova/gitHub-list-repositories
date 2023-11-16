@@ -1,10 +1,8 @@
-// import Link from "next/link";
-
 import { Avatar, Typography, Layout } from "antd";
-import { linkStyle, siderStyle, textStyle, titleStyle } from "./InfoUser.style";
+import { linkStyle, siderStyle, textStyle } from "./InfoUser.style";
 
 const { Sider} = Layout;
-const { Title, Text, Link } = Typography;
+const { Text, Link } = Typography;
 
 export default function InfoUser({ data }){
     const user = data.user;

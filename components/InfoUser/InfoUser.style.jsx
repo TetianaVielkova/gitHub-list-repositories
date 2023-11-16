@@ -2,7 +2,6 @@ export const siderStyle = {
     paddingInline: 15,
     paddingTop: 15,
     color: 'var(--color-white)',
-    
 }
 
 export const titleStyle = {

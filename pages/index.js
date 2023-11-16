@@ -10,11 +10,12 @@ import { siteTitle } from '../components/Layout/layout';
 import LayoutSite from '../components/Layout/layout';
 import CardRepos from '../components/CardRepos/CardRepos';
 import ButtonLoadMore from '../components/Button/button';
+import Repositopy from './repositories/[name]';
 
 export async function getStaticProps() {
     const { data } = await client.query({
       query: USER_QUERY,
-      variables: { login: "TetianaVielkova", count: 9},
+      variables: { login: process.env.LOGIN, count: 9},
     });
 
   return {
@@ -36,7 +37,7 @@ export default function Home({ data }) {
       const { data: newData } = await client.query({
         query: USER_QUERY,
         variables: {
-          login: "TetianaVielkova",
+          login: process.env.LOGIN,
           count: 9,
           cursor: cursor,
         }
@@ -60,6 +61,6 @@ export default function Home({ data }) {
       </Head>
         <CardRepos data={data} />
         <ButtonLoadMore loadMore={loadMore} hasNextPage={hasNextPage} loading={loading} />
-      </LayoutSite>
+    </LayoutSite>
   );
 }

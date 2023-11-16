@@ -18,11 +18,33 @@ const USER_QUERY = gql`
           node {
             id
             name
+            description
             url
+            updatedAt
+            ref(qualifiedName: "main") {
+              target {
+                ... on Commit {
+                  history {
+                    totalCount
+                  }
+                }
+              }
+            }
+            stargazers {
+              totalCount
+            }
+            forks {
+              totalCount
+            }
+            issues {
+              totalCount
+            }
+            defaultBranchRef {
+              name
+            }
             primaryLanguage {
               name
             }
-            updatedAt
           }
         }
         pageInfo {

@@ -6,7 +6,6 @@ import { Typography, Layout, Image } from 'antd';
 const { Header } = Layout;
 const { Text} = Typography;
 
-
 export default function HeaderSite() {
     return (
         <Header style={headerStyle}>

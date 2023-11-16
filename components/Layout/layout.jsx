@@ -1,11 +1,11 @@
 import Head from 'next/head';
-
 import InfoUser from '../InfoUser/InfoUser';
 import FooterSite from '../Footer/footer';
 import HeaderSite from '../Header/header';
-
 import { Layout } from 'antd';
 import { contentStyle, layoutStyle } from './layout.style';
+import { Suspense } from 'react';
+import { Loader } from '../Loader/Loader';
 
 const { Content } = Layout;
 
@@ -29,7 +29,9 @@ export default function LayoutSite({children, data}) {
       <HeaderSite/>
       <Layout  hasSider>
         <InfoUser data={data}/>
-        <Content style={contentStyle} >{children}</Content>
+        <Suspense fallback={<Loader/>}>
+          <Content style={contentStyle} data={data}>{children}</Content>
+        </Suspense>
       </Layout>
       <FooterSite/>
     </Layout>
