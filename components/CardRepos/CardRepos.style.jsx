@@ -10,13 +10,25 @@ export const linkStyle = {
   textOverflow: 'ellipsis',
 }
 
+export const boxStyle = {
+  marginLeft: 20,
+  marginRight: 20,
+}
+
+export const selectStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  marginBottom: 20,
+}
+
 export const colStyle = {
   marginBottom: 16,
 }
 
 export const rowStyle = {
   display: 'flex',
-  justifyContent: 'center',
+  justifyContent: 'flex-start',
+  flexWrap: 'wrap',
   margin: 0,
 }
 

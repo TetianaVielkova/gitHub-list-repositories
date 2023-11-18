@@ -43,10 +43,12 @@ export default function RepositoryPage({repository, data}) {
     return <Loader />; 
 }
 
+const pageTitle = `${siteTitle} - ${repository.name}`;
+
     return (
       <RepositoryLayout data={data}>
         <Head>
-          <title>{siteTitle} - {repository.name}</title>
+          <title>{pageTitle}</title>
         </Head>
         <BackHomeBtn/>
         <Repository repository={repository}/>

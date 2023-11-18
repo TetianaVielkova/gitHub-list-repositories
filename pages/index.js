@@ -10,7 +10,6 @@ import { siteTitle } from '../components/Layout/layout';
 import LayoutSite from '../components/Layout/layout';
 import CardRepos from '../components/CardRepos/CardRepos';
 import ButtonLoadMore from '../components/Button/button';
-import Repositopy from './repositories/[name]';
 
 export async function getStaticProps() {
     const { data } = await client.query({
@@ -28,6 +27,7 @@ export async function getStaticProps() {
 export default function Home({ data }) {
   const [cursor, setCursor] = useState(data.user.repositories.pageInfo.endCursor);
   const [hasNextPage, setHasNextPage] = useState(data.user.repositories.pageInfo.hasNextPage);
+  const [repositories, setRepositories] = useState(data.user.repositories.edges);
   const [updatedData, setData] = useState(data);
   const [loading, setLoading] = useState(false);
 
@@ -45,12 +45,9 @@ export default function Home({ data }) {
       setLoading(false);
 
       const newEdges = newData.user.repositories.edges;
+      setRepositories(prevRepositories => [...prevRepositories, ...newEdges]);
       setCursor(newData.user.repositories.pageInfo.endCursor);
       setHasNextPage(newData.user.repositories.pageInfo.hasNextPage);
-      const combinedEdges = [...data.user.repositories.edges, ...newEdges];
-      const updatedData = { ...data };
-      updatedData.user.repositories.edges = combinedEdges;
-      setData(updatedData);
     }
   };
 
@@ -59,7 +56,7 @@ export default function Home({ data }) {
       <Head>
         <title>{siteTitle}</title>
       </Head>
-        <CardRepos data={data} />
+        <CardRepos repositories={repositories}/>
         <ButtonLoadMore loadMore={loadMore} hasNextPage={hasNextPage} loading={loading} />
     </LayoutSite>
   );
