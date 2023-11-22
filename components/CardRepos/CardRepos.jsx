@@ -5,11 +5,12 @@ import Link from 'next/link';
 import Date from '../Date/date';
 import { boxStyle, colStyle, langStyle, linkStyle, rowStyle, selectStyle } from './CardRepos.style';
 import { useRouter } from 'next/router';
-import { parseISO } from 'date-fns';
 import { useQuery } from '@apollo/client';
 import { ALL_REPOSITORIES_QUERY } from '../../utils/allReposGraphQl';
 import Filter from '../Filter/Filter';
 import Sort from '../Sort/Sort';
+import { filterRepositoriesByLanguage } from './../../utils/helpers/filterRepositoriesByLanguage';
+import { sortRepositories } from './../../utils/helpers/sortRepositories';
 
 export default function CardRepos({ repositories }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,7 @@ export default function CardRepos({ repositories }) {
   const [sortingOption, setSortingOption] = useState(null);
   const router = useRouter();
 
-  const { loading, error, data } = useQuery(ALL_REPOSITORIES_QUERY, {
+  const { loading, data } = useQuery(ALL_REPOSITORIES_QUERY, {
     variables: {
       login: process.env.LOGIN,
       language: filteredLanguage,
@@ -55,27 +56,9 @@ export default function CardRepos({ repositories }) {
   const handleSortChange = (value) => {
     setSortingOption(value);
   };
-  
 
-  const filteredRepositories = allRepositories.filter(
-    ({ node }) => !filteredLanguage || node.primaryLanguage?.name === filteredLanguage
-  );
-
-  let sortedRepositories = [...filteredRepositories];
-
-  if (sortingOption === 'alphabetical') {
-    sortedRepositories.sort((a, b) => {
-      const nameA = a.node.name.toUpperCase();
-      const nameB = b.node.name.toUpperCase();
-      return nameA.localeCompare(nameB);
-    });
-  } else if (sortingOption === 'date') {
-    sortedRepositories.sort((a, b) => {
-      const dateA = parseISO(a.node.updatedAt);
-      const dateB = parseISO(b.node.updatedAt);
-      return dateB.getTime() - dateA.getTime();
-    });
-  }
+  const filteredRepositories = filterRepositoriesByLanguage(allRepositories, filteredLanguage);
+  let sortedRepositories = sortRepositories(filteredRepositories, sortingOption);
 
   return (
     <div style={boxStyle}>
