@@ -3,10 +3,10 @@ import { buttonStyle } from './button.style';
 
 import React from 'react';
 
-function ButtonLoadMore({ loadMore, hasNextPage, loading }) {
+function ButtonLoadMore({ loadMore,  loading }) {
   return (
     <>
-      {hasNextPage && (<Button style={buttonStyle} type="default" size="large"  onClick={loadMore} loading={loading}>
+      <Button style={buttonStyle} type="default" size="large"  onClick={loadMore} loading={loading}>
       {loading ? (
           <span>
             Loading...
@@ -14,7 +14,7 @@ function ButtonLoadMore({ loadMore, hasNextPage, loading }) {
         ) : (
           'LOAD MORE'
         )}
-      </Button>)}
+      </Button>
       </>
   );
 }

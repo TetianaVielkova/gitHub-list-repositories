@@ -12,9 +12,6 @@ export default function Repository({repository}) {
             <div style={textStyle}>Description: <span style={secondaryTextStyle}>{repository.description || 'No information available'}</span></div>
             <div style={textStyle}>Commit Count: <span style={secondaryTextStyle}>{repository.ref?.target?.history?.totalCount || 'N/A'}</span></div>
             <div style={textStyle}>Default Branch: <span style={secondaryTextStyle}>{repository.defaultBranchRef ? repository.defaultBranchRef.name : 'N/A'}</span></div>
-            {/* <div>{repository.issues ? repository.issues.totalCount : 'N/A'}</div>
-            <div>{repository.forks ? repository.forks.totalCount : 'N/A'}</div>
-            <div>{repository.stargazers ? repository.stargazers.totalCount : 'N/A'}</div> */}
         </div>
     );
 }

@@ -30,15 +30,6 @@ const USER_QUERY = gql`
                 }
               }
             }
-            stargazers {
-              totalCount
-            }
-            forks {
-              totalCount
-            }
-            issues {
-              totalCount
-            }
             defaultBranchRef {
               name
             }
@@ -46,10 +37,6 @@ const USER_QUERY = gql`
               name
             }
           }
-        }
-        pageInfo {
-          endCursor
-          hasNextPage
         }
       }
     }
