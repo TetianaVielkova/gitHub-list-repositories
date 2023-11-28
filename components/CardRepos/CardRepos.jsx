@@ -10,6 +10,7 @@ import Sort from '../Sort/Sort';
 import { filterRepositoriesByLanguage } from './../../utils/helpers/filterRepositoriesByLanguage';
 import { sortRepositories } from './../../utils/helpers/sortRepositories';
 import ButtonLoadMore from '../Button/button';
+import SearchName from '../Search/Search';
 
 export default function CardRepos({ data }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,7 @@ export default function CardRepos({ data }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [displayedRepositories, setDisplayedRepositories] = useState([]);
   const [sortedRepositories, setSortedRepositories] = useState([]); 
+  const [searchText, setSearchText] = useState('');
 
   const router = useRouter();
 
@@ -53,6 +55,16 @@ export default function CardRepos({ data }) {
     setCurrentPage(1);
   };
 
+  const handleSearch = (searchText) => {
+    const filtered = allRepositories.filter(({ node }) =>
+      node.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+  
+    setDisplayedRepositories(filtered.slice(0, 9));
+    setSortedRepositories(filtered);
+    setCurrentPage(1);
+  };
+
   const loadMore = () => {
     const nextPage = currentPage + 1;
     const startIndex = (nextPage - 1) * 9;
@@ -70,6 +82,7 @@ export default function CardRepos({ data }) {
       {isLoading && <Loader />}
       <div style={selectStyle}>
         <Filter handleLanguageChange={handleLanguageChange} />
+        <SearchName handleSearch={handleSearch}/>
         <Sort handleSortChange={handleSortChange} />
       </div>
       <Row gutter={{ xs: 8, sm: 16, md: 24 }} style={rowStyle}>
