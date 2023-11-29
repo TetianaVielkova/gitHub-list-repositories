@@ -11,6 +11,7 @@ import { filterRepositoriesByLanguage } from './../../utils/helpers/filterReposi
 import { sortRepositories } from './../../utils/helpers/sortRepositories';
 import ButtonLoadMore from '../Button/button';
 import SearchName from '../Search/Search';
+import { handleSearchRepositories } from '../../utils/helpers/searchRepositories';
 
 export default function CardRepos({ data }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,6 @@ export default function CardRepos({ data }) {
   const [searchText, setSearchText] = useState('');
 
   const router = useRouter();
-
   useEffect(() => {
     setIsLoading(true);
     if (repositories?.length > 0) {
@@ -55,11 +55,14 @@ export default function CardRepos({ data }) {
     setCurrentPage(1);
   };
 
+  const handleChange = (e) => {
+    const searchText = e.target.value;
+    handleSearch(searchText);
+  };
+
   const handleSearch = (searchText) => {
-    const filtered = allRepositories.filter(({ node }) =>
-      node.name.toLowerCase().includes(searchText.toLowerCase())
-    );
-  
+    const filtered = handleSearchRepositories(allRepositories, searchText);
+
     setDisplayedRepositories(filtered.slice(0, 9));
     setSortedRepositories(filtered);
     setCurrentPage(1);
@@ -82,7 +85,7 @@ export default function CardRepos({ data }) {
       {isLoading && <Loader />}
       <div style={selectStyle}>
         <Filter handleLanguageChange={handleLanguageChange} />
-        <SearchName handleSearch={handleSearch}/>
+        <SearchName handleSearch={handleSearch} handleChange={handleChange}/>
         <Sort handleSortChange={handleSortChange} />
       </div>
       <Row gutter={{ xs: 8, sm: 16, md: 24 }} style={rowStyle}>

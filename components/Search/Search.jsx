@@ -1,13 +1,7 @@
 import { Input } from 'antd';
 const { Search } = Input;
 
-
-export default function SearchName({ handleSearch }) {
-    const handleChange = (e) => {
-        const searchText = e.target.value;
-        handleSearch(searchText);
-      };
-
+export default function SearchName({ handleSearch, handleChange }) {
     return (
     <Search
         placeholder="Search by name"
