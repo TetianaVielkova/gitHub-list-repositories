@@ -11,13 +11,14 @@ import SearchName from '../Search/Search';
 import PaginationButtons from '../PaginationButtons/PaginationButtons';
 import { filterRepositoriesByLanguage } from './../../utils/helpers/filterRepositoriesByLanguage';
 import { sortRepositories } from './../../utils/helpers/sortRepositories';
-import { handleSearchRepositories } from '../../utils/helpers/searchRepositories';
 import { updateDisplayedButtons } from '../../utils/helpers/updateDisplayedButtons';
+import { handleSearchRepositories } from '../../utils/helpers/searchRepositories';
 
 export default function CardRepos({ data }) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [repositories, setRepositories] = useState(data.user.repositories.edges);
   const [allRepositories, setAllRepositories] = useState([]);
   const [filteredLanguage, setFilteredLanguage] = useState('');
   const [sortingOption, setSortingOption] = useState('');
@@ -25,8 +26,9 @@ export default function CardRepos({ data }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [displayedRepositories, setDisplayedRepositories] = useState([]);
   const [displayedButtons, setDisplayedButtons] = useState([]);
+  const [sortedRepositories, setSortedRepositories] = useState([]); 
+  const [searchText, setSearchText] = useState('');
 
-  const repositories = data.user.repositories.edges;
 
   const handleRepoClick = (name) => {
     setIsLoading(true);
@@ -42,14 +44,19 @@ export default function CardRepos({ data }) {
   }, [repositories]);
 
   useEffect(() => {
-    const filtered = filterRepositoriesByLanguage(allRepositories, filteredLanguage);
+    let filtered = handleSearchRepositories(allRepositories, searchText);
+    filtered = filterRepositoriesByLanguage(filtered, filteredLanguage);
     const sorted = sortRepositories(filtered, sortingOption);
+    const totalFilteredPages = Math.ceil(sorted.length / 6);
+    setTotalPages(totalFilteredPages);
+    setCurrentPage((currentPage) => Math.min(currentPage, totalFilteredPages));
     const startIndex = (currentPage - 1) * 6;
     const endIndex = currentPage * 6;
-    setDisplayedRepositories(sorted.slice(startIndex, endIndex));
-    setTotalPages(Math.ceil(sorted.length / 6));
-    setDisplayedButtons(updateDisplayedButtons(totalPages, currentPage));
-  }, [allRepositories, filteredLanguage, sortingOption, currentPage, totalPages]);
+    const displayed = sorted.slice(startIndex, endIndex);
+    setDisplayedRepositories(displayed);
+    setSortedRepositories(sorted);
+    setDisplayedButtons(updateDisplayedButtons(totalFilteredPages, currentPage));
+  }, [allRepositories, filteredLanguage, sortingOption, currentPage, totalPages, searchText]);
 
   const handleLanguageChange = (values) => {
     setFilteredLanguage(values || []); 
@@ -107,13 +114,13 @@ export default function CardRepos({ data }) {
       {isLoading && <Loader />}
       <Row gutter={{ xs: 8, sm: 16, md: 24 }} style={selectStyle}>
         <Col xs={24} sm={12} md={11} lg={8} xl={8} style={colStyle}>
-          <Filter handleLanguageChange={handleLanguageChange} filteredLanguages={filteredLanguage} />
+          <Filter handleLanguageChange={handleLanguageChange} filteredLanguages={filteredLanguage}/>
         </Col>
         <Col xs={24} sm={12} md={11} lg={8} xl={8} style={colStyle}>
-          <SearchName handleSearch={handleSearch} handleChange={handleChange} />
+          <SearchName handleChange={handleChange} handleSearch={handleSearch}/>
         </Col>
         <Col xs={24} sm={12} md={11} lg={8} xl={8} style={colStyle}>
-          <Sort handleSortChange={handleSortChange} sortingOption={sortingOption} />
+          <Sort handleSortChange={handleSortChange} sortingOption={sortingOption}/>
         </Col>
       </Row>
       <Row gutter={{ xs: 8, sm: 16, md: 24 }} style={rowStyle}>
