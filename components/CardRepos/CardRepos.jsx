@@ -98,14 +98,19 @@ export default function CardRepos({ data }) {
   }, [router]);
 
   useEffect(() => {
+    const query = {};
+    if (currentPage > 1) {
+      query.page = currentPage;
+    }
+    if (filteredLanguage !== '') {
+      query.language = filteredLanguage;
+    }
+    if (sortingOption !== '') {
+      query.sort = sortingOption;
+    }
     router.replace({
       pathname: router.pathname,
-      query: {
-        ...router.query,
-        page: currentPage,
-        language: filteredLanguage,
-        sort: sortingOption,
-      },
+      query,
     });
   }, [currentPage, filteredLanguage, sortingOption, router]);
 
