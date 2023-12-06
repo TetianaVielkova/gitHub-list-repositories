@@ -1,5 +1,8 @@
-export const filterRepositoriesByLanguage = (repositories, filteredLanguage) => {
-    return repositories.filter(
-      ({ node }) => !filteredLanguage || node.primaryLanguage?.name === filteredLanguage
-    );
-  };
+export const filterRepositoriesByLanguage = (repositories, filteredLanguages) => {
+  return repositories.filter(({ node }) => {
+    if (!filteredLanguages || filteredLanguages.length === 0) {
+      return true;
+    }
+    return filteredLanguages.includes(node.primaryLanguage?.name);
+  });
+};

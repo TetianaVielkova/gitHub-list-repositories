@@ -17,8 +17,10 @@ export const boxStyle = {
 
 export const selectStyle = {
   display: 'flex',
-  justifyContent: 'space-between',
-  marginBottom: 20,
+  justifyContent: 'flex-start',
+  flexWrap: 'wrap',
+  margin: 0,
+  marginBottom: 30,
 }
 
 export const colStyle = {
@@ -30,6 +32,7 @@ export const rowStyle = {
   justifyContent: 'flex-start',
   flexWrap: 'wrap',
   margin: 0,
+  marginBottom: 30,
 }
 
 export const langStyle = {
