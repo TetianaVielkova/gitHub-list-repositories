@@ -15,6 +15,7 @@ export async function getServerSideProps(context) {
   const currentPage = query.page ? parseInt(query.page) : 1;
   const filteredLanguage = query.language || '';
   const sortingOption = query.sort || '';
+  const searchText = query.search || ''; 
 
   return {
     props: {
@@ -22,6 +23,7 @@ export async function getServerSideProps(context) {
       currentPage,
       filteredLanguage,
       sortingOption,
+      searchText,
     },
   };
 }
@@ -32,7 +34,7 @@ export default function Home({ data }) {
       <Head>
         <title>{siteTitle}</title>
       </Head>
-      <CardRepos data={data} />
+      <CardRepos data={data}/>
     </LayoutSite>
   );
 }

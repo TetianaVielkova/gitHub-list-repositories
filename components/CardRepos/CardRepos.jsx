@@ -19,16 +19,17 @@ export default function CardRepos({ data }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [repositories, setRepositories] = useState(data.user.repositories.edges);
-  const [allRepositories, setAllRepositories] = useState([]);
-  const [filteredLanguage, setFilteredLanguage] = useState('');
-  const [sortingOption, setSortingOption] = useState('');
+  const [allRepositories, setAllRepositories] = useState(repositories || []);
+  const [filteredLanguages, setFilteredLanguages] = useState(router.query.language || '');
+  const [sortingOption, setSortingOption] = useState(router.query.sort || '');
   const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(parseInt(router.query.page) || 1);
   const [displayedRepositories, setDisplayedRepositories] = useState([]);
   const [displayedButtons, setDisplayedButtons] = useState([]);
   const [sortedRepositories, setSortedRepositories] = useState([]); 
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState(router.query.search || '');
 
+  const repositoriesPerPage = 6;
 
   const handleRepoClick = (name) => {
     setIsLoading(true);
@@ -45,23 +46,61 @@ export default function CardRepos({ data }) {
 
   useEffect(() => {
     let filtered = handleSearchRepositories(allRepositories, searchText);
-    filtered = filterRepositoriesByLanguage(filtered, filteredLanguage);
+    filtered = filterRepositoriesByLanguage(filtered, filteredLanguages);
     const sorted = sortRepositories(filtered, sortingOption);
-    const totalFilteredPages = Math.ceil(sorted.length / 6);
+    const totalFilteredPages = Math.ceil(sorted.length / repositoriesPerPage);
     setTotalPages(totalFilteredPages);
     setCurrentPage((currentPage) => Math.min(currentPage, totalFilteredPages));
-    const startIndex = (currentPage - 1) * 6;
-    const endIndex = currentPage * 6;
+    const startIndex = (currentPage - 1) * repositoriesPerPage;
+    const endIndex = currentPage * repositoriesPerPage;
     const displayed = sorted.slice(startIndex, endIndex);
     setDisplayedRepositories(displayed);
     setSortedRepositories(sorted);
     setDisplayedButtons(updateDisplayedButtons(totalFilteredPages, currentPage));
-  }, [allRepositories, filteredLanguage, sortingOption, currentPage, totalPages, searchText]);
+  }, [allRepositories, filteredLanguages, sortingOption, currentPage, totalPages, searchText]);
+
+  useEffect(() => {
+    const { query } = router;
+    const currentPageFromQuery = parseInt(query.page) || 1;
+    const filteredLanguageFromQuery = query.language || '';
+    const sortingOptionFromQuery = query.sort || '';
+  
+    setCurrentPage(currentPageFromQuery);
+    setFilteredLanguages(filteredLanguageFromQuery);
+    setSortingOption(sortingOptionFromQuery);
+  }, [router]);
+
+
+  useEffect(() => {
+    const query = {};
+    if (currentPage > 1) {
+      query.page = currentPage;
+    }
+    if (filteredLanguages !== '') {
+      query.language = filteredLanguages;
+    }
+    if (sortingOption !== '') {
+      query.sort = sortingOption;
+    }
+    if (searchText !== '') {
+      query.search = searchText;
+    }
+    const delayTime = 500; 
+    const timeoutId = setTimeout(() => {
+      router.replace({
+        pathname: router.pathname,
+        query,
+      });
+    }, delayTime);
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, filteredLanguages, sortingOption, searchText, router]);
 
   const handleLanguageChange = (values) => {
-    setFilteredLanguage(values || []); 
+    setFilteredLanguages(values ? values.join(',') : '');
     setCurrentPage(1);
   };
+
+  
   const handleSortChange = (value) => {
     setSortingOption(value);
     setCurrentPage(1);
@@ -70,59 +109,26 @@ export default function CardRepos({ data }) {
   const handleSearch = (searchText) => {
     setSearchText(searchText);
     let filtered = handleSearchRepositories(allRepositories, searchText);
-    filtered = filterRepositoriesByLanguage(filtered, filteredLanguage);
+    filtered = filterRepositoriesByLanguage(filtered, filteredLanguages);
     const sorted = sortRepositories(filtered, sortingOption);
     setSortedRepositories(sorted);
-    setDisplayedRepositories(sorted.slice(0, 6));
+    setDisplayedRepositories(sorted.slice(0, repositoriesPerPage));
     setCurrentPage(1);
-  };
-
-  const handleChange = (e) => {
-    const searchText = e.target.value;
-    handleSearch(searchText);
   };
 
   const handleButtonClick = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  useEffect(() => {
-    const { query } = router;
-    const currentPageFromQuery = parseInt(query.page) || 1;
-    const filteredLanguageFromQuery = query.language || '';
-    const sortingOptionFromQuery = query.sort || '';
-
-    setCurrentPage(currentPageFromQuery);
-    setFilteredLanguage(filteredLanguageFromQuery);
-    setSortingOption(sortingOptionFromQuery);
-  }, [router]);
-
-  useEffect(() => {
-    const query = {};
-    if (currentPage > 1) {
-      query.page = currentPage;
-    }
-    if (filteredLanguage !== '') {
-      query.language = filteredLanguage;
-    }
-    if (sortingOption !== '') {
-      query.sort = sortingOption;
-    }
-    router.replace({
-      pathname: router.pathname,
-      query,
-    });
-  }, [currentPage, filteredLanguage, sortingOption, router]);
-
   return (
     <div style={boxStyle}>
       {isLoading && <Loader />}
       <Row gutter={{ xs: 8, sm: 16, md: 24 }} style={selectStyle}>
         <Col xs={24} sm={12} md={11} lg={8} xl={8} style={colStyle}>
-          <Filter handleLanguageChange={handleLanguageChange} filteredLanguages={filteredLanguage}/>
+          <Filter handleLanguageChange={handleLanguageChange} filteredLanguages={filteredLanguages}/>
         </Col>
         <Col xs={24} sm={12} md={11} lg={8} xl={8} style={colStyle}>
-          <SearchName handleChange={handleChange} handleSearch={handleSearch}/>
+          <SearchName handleSearch={handleSearch} searchText={searchText}/>
         </Col>
         <Col xs={24} sm={12} md={11} lg={8} xl={8} style={colStyle}>
           <Sort handleSortChange={handleSortChange} sortingOption={sortingOption}/>

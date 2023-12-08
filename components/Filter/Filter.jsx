@@ -1,6 +1,14 @@
 import { Select } from 'antd';
 
 export default function Filter({ handleLanguageChange, filteredLanguages }) {
+  let selectedLanguages = [];
+
+  if (Array.isArray(filteredLanguages)) {
+    selectedLanguages = filteredLanguages.filter(lang => typeof lang === 'string' && lang.trim() !== '');
+  } else if (typeof filteredLanguages === 'string' && filteredLanguages.trim() !== '') {
+    selectedLanguages = filteredLanguages.split(',').map(lang => lang.trim());
+  }
+
   return (
     <Select
       mode="multiple"
@@ -15,7 +23,7 @@ export default function Filter({ handleLanguageChange, filteredLanguages }) {
         { value: 'JavaScript', label: 'JavaScript' },
         { value: 'TypeScript', label: 'TypeScript' },
       ]}
-      value={filteredLanguages.length ? filteredLanguages : []}
+      value={selectedLanguages}
     />
   );
 }
