@@ -8,7 +8,7 @@ module.exports = {
       domains: ['avatars.githubusercontent.com'],
     },
     env: {
-      GITHUB_TOKEN: "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",
+      GITHUB_TOKEN: "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",
       LOGIN: "TetianaVielkova",
       URL_GITHUB: "https://api.github.com/graphql",
     },

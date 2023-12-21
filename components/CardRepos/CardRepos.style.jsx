@@ -25,6 +25,7 @@ export const selectStyle = {
 
 export const colStyle = {
   marginBottom: 16,
+  position: 'relative',
 }
 
 export const rowStyle = {
@@ -37,4 +38,29 @@ export const rowStyle = {
 
 export const langStyle = {
   fontSize: 18,
+}
+
+export const btnBoxStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+}
+
+export const iconStyleDelete = {
+  border: 'none',
+  boxShadow:'none',
+  marginRight: 10,
+  position: 'absolute',
+  top: 25,
+  right: 70, 
+  background: 'inherit'
+}
+
+export const iconStyle = {
+  border: 'none',
+  boxShadow:'none',
+  marginRight: 10,
+  position: 'absolute',
+  top: 25,
+  right: 25, 
+  background: 'inherit'
 }

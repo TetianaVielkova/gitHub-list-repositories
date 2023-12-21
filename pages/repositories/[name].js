@@ -25,7 +25,7 @@ export async function getStaticProps({ params }) {
   const repositoryName = params.name;
   const { data } = await client.query({
     query: USER_QUERY,
-    variables: { login: process.env.LOGIN, count: 50, repositoryName }, 
+    variables: { login: process.env.LOGIN, count: 100, repositoryName }, 
   });
 
   return {
