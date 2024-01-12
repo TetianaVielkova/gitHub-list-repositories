@@ -7,7 +7,8 @@ const schema = yup.object({
     .required('Repository name is required'),
   description: yup
     .string()
-    .max(200, 'Maximum 200 characters'),
+    .max(200, 'Maximum 200 characters')
+    .notRequired(),
   updatedAt: yup
     .string()
     .required('Repository updatedAt is required'),

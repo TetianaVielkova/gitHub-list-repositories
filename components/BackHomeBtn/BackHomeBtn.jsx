@@ -13,7 +13,7 @@ export default function BackHomeBtn() {
         router.back();
         setTimeout(() => {
             setIsLoading(false);
-        }, 2000);
+        }, 200);
     };
 
     return (

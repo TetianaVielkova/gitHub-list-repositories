@@ -2,6 +2,7 @@ import Link from "next/link";
 import { containerStyle, linkStyle, nameStyle, secondaryTextStyle, textStyle } from "./Repository.style";
 
 export default function Repository({repository}) {
+
     return (
         <div style={containerStyle} key={repository.id} >
             <div style={nameStyle}>{repository.name}</div>

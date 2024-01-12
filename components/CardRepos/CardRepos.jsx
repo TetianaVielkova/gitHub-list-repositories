@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Row, Col, Button } from 'antd';
-import { boxStyle, btnBoxStyle, colStyle, iconStyle, iconStyleDelete, langStyle, linkStyle, rowStyle, selectStyle } from './CardRepos.style';
+import { Row, Col} from 'antd';
+import { ref, onValue, off, remove, update, get} from 'firebase/database';
+import database from './../../firebaseConfig';
+import { boxStyle, colStyle, langStyle, linkStyle, rowStyle, selectStyle } from './CardRepos.style';
 import { Loader } from '../Loader/Loader';
 import Filter from '../Filter/Filter';
 import Sort from '../Sort/Sort';
 import SearchName from '../Search/Search';
+import RepositoryDeletion from '../RepositoryDeletion/RepositoryDeletion';
+import RepositoryEditing from '../RepositoryEditing/RepositoryEditing';
 import PaginationButtons from '../PaginationButtons/PaginationButtons';
 import { filterRepositoriesByLanguage } from './../../utils/helpers/filterRepositoriesByLanguage';
 import { sortRepositories } from './../../utils/helpers/sortRepositories';
 import { updateDisplayedButtons } from '../../utils/helpers/updateDisplayedButtons';
 import { handleSearchRepositories } from '../../utils/helpers/searchRepositories';
-import {DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { ConfirmationModal } from '../ConfirmationModal/ConfirmationModal';
- 
+
 export default function CardRepos({ data }) {
   const router = useRouter();
 
@@ -28,85 +30,40 @@ export default function CardRepos({ data }) {
   const [displayedButtons, setDisplayedButtons] = useState([]);
   const [sortedRepositories, setSortedRepositories] = useState([]); 
   const [searchText, setSearchText] = useState(router.query.search || '');
-  const [storageData, setStorageData] = useState(null);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [repositoryToDelete, setRepositoryToDelete] = useState(null);
 
   const repositoriesPerPage = 6;
 
-  //=============================================================================
+//==========Add===========================================================================
+
   useEffect(() => {
-    const localStorageDataFormat = (localStorageData) => {
-      if (!localStorageData) {
-        console.log('No data found in local storage.');
-        return null;
-      }
-    
-      try {
-        const parsedData = JSON.parse(localStorageData);
-
-        const storageRepositories = parsedData.map((repo) => {
-          return {
-            "node": {
-              "id": repo.id,
-              "name": repo.name.toUpperCase(),
-              "description": repo.description || null,
-              "updatedAt": repo.updatedAt, 
-              "ref": {
-                "history": {
-                  "totalCount": repo.commitCount
-                }
-              },
-              "defaultBranchRef": {
-                "name": repo.defaultBranch
-              },
-              "primaryLanguage": {
-                "name": repo.primaryLanguage
-              },
-              "isLocalStorage": true
-            }
-          };
-        });
-        return storageRepositories;
-      } catch (error) {
-        console.error('Error parsing data from localStorage:', error);
-        return null;
-      }
-    };
+    const repositoriesRef = ref(database, 'repositories');
   
-    const getLocalDataFromStorage = () => {
-      try {
-        const data = localStorage.getItem('repositories');
-        const formattedData = localStorageDataFormat(data);
-        setStorageData(formattedData);
-      } catch (error) {
-        console.error('Error fetching from localStorage:', error);
-        setStorageData(null);
-      }
+    onValue(repositoriesRef, (snapshot) => {
+      const fetchedRepositories = [];
+      snapshot.forEach((childSnapshot) => {
+        const repository = childSnapshot.val();
+        fetchedRepositories.push(repository);
+      });
+  
+      setAllRepositories((prevRepositories) => {
+        const uniqueRepositories = fetchedRepositories.filter(
+          (newRepo) => !prevRepositories.some((existingRepo) => existingRepo.node.id === newRepo.node.id)
+        );
+        return [...prevRepositories, ...uniqueRepositories];
+      });
+    });
+  
+    return () => {
+      off(repositoriesRef);
     };
-    getLocalDataFromStorage(); 
   }, []);
-
-
 //====================================================================================================
-useEffect(() => {
-  setIsLoading(true);
-  if (Array.isArray(storageData) && storageData.length > 0) {
-    setAllRepositories((prevRepositories) => [...prevRepositories, ...storageData]);
-  }
-  setIsLoading(false);
-}, [storageData]);
-
   const handleRepoClick = (name) => {
     setIsLoading(true);
     router.push(`/repositories/${name}`);
   };
-
-  const handleLocalRepoClick = (id) => {
-    setIsLoading(true);
-    router.push(`/local-repositories/${id}`);
-  };
-
+  
   useEffect(() => {
     let filtered = handleSearchRepositories(allRepositories, searchText);
     filtered = filterRepositoriesByLanguage(filtered, filteredLanguages);
@@ -181,28 +138,70 @@ useEffect(() => {
   const handleButtonClick = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-
-  const handleDeleteRepo = (id) => {
-    setRepositoryToDelete(id);
-    setDeleteModalVisible(true);
-  };
-
-  const handleConfirmDelete = () => {
-    if (repositoryToDelete) {
-      const updatedStorageData = storageData.filter(
-        (repo) => repo.node.id !== repositoryToDelete
-      );
-      localStorage.setItem('repositories', JSON.stringify(updatedStorageData));
-      setAllRepositories(allRepositories.filter(
-        (repo) => repo.node.id !== repositoryToDelete
-      ));
-      setDisplayedRepositories(displayedRepositories.filter(
-        (repo) => repo.node.id !== repositoryToDelete
-      ));
-      setDeleteModalVisible(false);
+  //==========Edit========================================================
+  const handleUpdateRepo = async (repoId, updatedData) => {
+    try {
+      const repositoryRef = ref(database, `repositories/${repoId}`);
+      const snapshot = await get(repositoryRef);
+  
+      if (!snapshot.exists()) {
+        console.error(`Repository with ID ${repoId} not found in Firebase.`);
+        return;
+      }
+      const RepoId = snapshot.key;
+      const updatedFields = {
+        "__typename": "RepositoryEdge",
+          "node": {
+            "__typename": "Repository",
+            "id": RepoId,
+            "name": updatedData.name ? updatedData.name.toUpperCase() : "",
+            "description": updatedData.description || null,
+            "url": "https://github.com/repository",
+            "updatedAt": updatedData.updatedAt || "default value if updatedAt is undefined",
+            "ref": {
+              "__typename": "Commit",
+              "history": {
+              "__typename": "CommitHistoryConnection",
+              "totalCount": updatedData.commitCount || 0
+              }
+            },
+            "defaultBranchRef": {
+              "__typename": "ref",
+              "name": updatedData.defaultBranch || "defaultBranchValue"
+            },
+            "primaryLanguage": {
+              "__typename": "Language",
+              "name": updatedData.primaryLanguage || "defaultValue"
+            },
+            isFirebase: true
+          }
+      }
+      await update(repositoryRef, updatedFields);
+      onValue(repositoryRef, (updatedSnapshot) => {
+        const updatedRepository = updatedSnapshot.val();
+        setAllRepositories((prevRepositories) =>
+          prevRepositories.map((repo) =>
+            repo.node.id === updatedRepository.node.id ? { ...repo, node: updatedRepository.node } : repo
+          )
+        );
+      });
+    } catch (error) {
+      console.error('Error updating repository:', error);
+      throw error;
     }
   };
-
+  //=============Delete=================================================================================
+  const handleDeleteRepo = async (deletedRepoId) => {
+    try {
+      const repositoryRef = ref(database, `repositories/${deletedRepoId}`);
+      await remove(repositoryRef);
+      const updatedRepositories = allRepositories.filter((repo) => repo.node.id !== deletedRepoId);
+      setAllRepositories(updatedRepositories);
+    } catch (error) {
+      console.error('Error deleting repository:', error);
+    }
+  };
+//====================================================================================================
   return (
     <div style={boxStyle}>
       {isLoading && <Loader />}
@@ -220,28 +219,19 @@ useEffect(() => {
       <Row gutter={{ xs: 8, sm: 16, md: 24 }} style={rowStyle}>
         {displayedRepositories.map(({node}) => (
           <Col xs={24} sm={12} md={11} lg={8} xl={8} key={node.id} style={colStyle}>
-          {node.isLocalStorage ? (
-          <><Link href={{ pathname: `/local-repositories/${node.id}` }}>
-                <div onClick={() => handleLocalRepoClick(node.id)} style={linkStyle}>
-                  <div style={btnBoxStyle}>
-                    {node.name}
-
-                  </div>
-                  <div style={langStyle}>{node.primaryLanguage ? node.primaryLanguage.name : ''}</div>
-                  <div>{node.updatedAt.slice(0, 10)}</div>
-                </div>
-              </Link><div>
-                    <Button style={iconStyleDelete}><EditOutlined style={{ fontSize: '20px' }}/></Button>
-                  <Button  style={iconStyle}><DeleteOutlined style={{ fontSize: '20px' }} onClick={() =>  handleDeleteRepo(node.id)} /></Button>
-                  
-                </div></>
-        ) : (<Link href={{pathname: `/repositories/${node.name}`}}>
-              <div onClick={() => handleRepoClick(node.name)} style={linkStyle}>
+            <Link href={`/repositories/${node.name}`}>
+              <div style={linkStyle} onClick={() => handleRepoClick(node.name)}>
                 {node.name}
-                <div style={langStyle}>{node.primaryLanguage ? node.primaryLanguage.name : ''}</div>
-                <div>{node.updatedAt.slice(0, 10)}</div> 
+              <div style={langStyle}>{node.primaryLanguage ? node.primaryLanguage.name : ''}</div>
+              <div>{node.updatedAt.slice(0, 10)}</div> 
               </div>
-            </Link>)}
+            </Link>
+            {node.isFirebase ? (
+              <div>
+                <RepositoryEditing repository={node} onUpdateRepo={handleUpdateRepo}/>
+                <RepositoryDeletion  onDeleteRepo={handleDeleteRepo} repoId={node.id}/>
+              </div>
+          ) : ''}
           </Col>
         ))}
       </Row>
@@ -249,13 +239,6 @@ useEffect(() => {
         displayedButtons={displayedButtons}
         currentPage={currentPage}
         handleButtonClick={handleButtonClick}
-      />
-      <ConfirmationModal
-        visible={deleteModalVisible}
-        title="Delete Repository"
-        content="Are you sure you want to delete this repository?"
-        handleOk={handleConfirmDelete}
-        handleCancel={() => setDeleteModalVisible(false)}
       />
     </div>
   );

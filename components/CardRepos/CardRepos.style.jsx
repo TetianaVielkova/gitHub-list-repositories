@@ -45,7 +45,7 @@ export const btnBoxStyle = {
   justifyContent: 'space-between',
 }
 
-export const iconStyleDelete = {
+export const iconStyleEdit = {
   border: 'none',
   boxShadow:'none',
   marginRight: 10,
